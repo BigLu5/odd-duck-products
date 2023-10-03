@@ -111,3 +111,67 @@ const viewResults = document.getElementById("view-results");
 viewResults.addEventListener("click", showResults);
 
 renderProducts();
+
+// Define an array to store product names
+const productNames = [];
+
+// Define arrays to store vote and view data
+const voteData = [];
+const viewData = [];
+
+// Create a canvas element for the chart
+const chartCanvas = document.getElementById("myChart");
+const ctx = chartCanvas.getContext("2d");
+
+// Collect voting and views data
+function collectData() {
+  for (const product of products) {
+    productNames.push(product.name);
+    voteData.push(product.clicks);
+    viewData.push(product.views);
+  }
+}
+
+// Function to create and render the bar chart
+function renderChart() {
+  const chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: productNames,
+      datasets: [
+        {
+          label: "Votes",
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+          data: voteData,
+        },
+        {
+          label: "Views",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          borderColor: "rgba(255, 99, 132, 1)",
+          borderWidth: 1,
+          data: viewData,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
+// Function to show results and render the chart
+function showResults() {
+  collectData();
+  renderChart();
+  // Display the chart canvas element
+  chartCanvas.style.display = "block";
+}
+
+// Hide the chart initially
+chartCanvas.style.display = "none";
