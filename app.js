@@ -4,29 +4,50 @@ const img3 = document.getElementById("img3");
 
 // make sure the user only has 25 clicks
 let userClicks = 0;
-let maxClicks = 25;
+const maxClicks = 20;
+
+const products = [];
 
 // a constructor that makes product objects
-function Product(name) {
+function Product(name, views, clicks) {
   this.name = name;
   this.src = `./images/${name}.jpg`;
-  this.views = 0;
-  this.clicks = 0;
+  this.views = views;
+  this.clicks = clicks;
+  products.push(this); // take the new object that is created, and put it into the array
 }
 
-const products = [
-  new Product("bag"),
-  new Product("banana"),
-  new Product("bathroom"),
-  new Product("boots"),
-  new Product("breakfast"),
-  new Product("bubblegum"),
-  new Product("chair"),
-  new Product("cthulhu"),
-  new Product("dog-duck"),
-  new Product("dragon"),
-  new Product("pen"),
-];
+// if there is nothing in localStorage for the products:
+// instantiate my default products (0 views and clicks)
+if (localStorage.getItem("products") === null) {
+  new Product("bag", 0, 0);
+  new Product("banana", 0, 0);
+  new Product("bathroom", 0, 0);
+  new Product("boots", 0, 0);
+  new Product("breakfast", 0, 0);
+  new Product("bubblegum", 0, 0);
+  new Product("chair", 0, 0);
+  new Product("cthulhu", 0, 0);
+  new Product("dog-duck", 0, 0);
+  new Product("dragon", 0, 0);
+  new Product("pen", 0, 0);
+  new Product("pet-sweep", 0, 0);
+  new Product("scissors", 0, 0);
+  new Product("shark", 0, 0);
+  new Product("sweep", 0, 0);
+  new Product("tauntaun", 0, 0);
+  new Product("unicorn", 0, 0);
+  new Product("water-can", 0, 0);
+  new Product("wine-glass", 0, 0);
+} else {
+  const productsLS = JSON.parse(localStorage.getItem("products"));
+  // for each item in the productsLS array, make a new Product
+  for (let i = 0; i < productsLS.length; i++) {
+    // create a new product for each item in the array
+    //(and the Product function automatically adds it to the producst array)
+    new Product(productsLS[i].name, productsLS[i].views, productsLS[i].clicks);
+  }
+}
 
 // function that randomly gets a index for an item in item
 function randomProdIdx() {
@@ -67,6 +88,9 @@ function handleImgClick(event) {
   // check if the user has run out of clicks
   if (userClicks === maxClicks) {
     alert("You have run out of votes");
+    renderChart();
+    // take our array after we have updated the clicks and views, and add to localStorage
+    localStorage.setItem("products", JSON.stringify(products));
     return; // end the function here and don't run the rest
   }
 
@@ -92,86 +116,40 @@ img1.addEventListener("click", handleImgClick);
 img2.addEventListener("click", handleImgClick);
 img3.addEventListener("click", handleImgClick);
 
-// a button to view the results
-function showResults() {
-  // put a bunch of lis into a ul
-  const results = document.getElementById("results");
-
-  // loop through our products and make an li for each one
-  for (let i = 0; i < products.length; i++) {
-    const li = document.createElement("li");
-    const product = products[i];
-    li.textContent = `${product.name} was viewed ${product.views} times, and clicked ${product.clicks} times`;
-    results.appendChild(li);
-  }
-}
-
-// make the button show the results
-const viewResults = document.getElementById("view-results");
-viewResults.addEventListener("click", showResults);
-
-renderProducts();
-
-// Define an array to store product names
-const productNames = [];
-
-// Define arrays to store vote and view data
-const voteData = [];
-const viewData = [];
-
-// Create a canvas element for the chart
-const chartCanvas = document.getElementById("myChart");
-const ctx = chartCanvas.getContext("2d");
-
-// Collect voting and views data
-function collectData() {
-  for (const product of products) {
-    productNames.push(product.name);
-    voteData.push(product.clicks);
-    viewData.push(product.views);
-  }
-}
-
-// Function to create and render the bar chart
+// function to create a new chart
 function renderChart() {
-  const chart = new Chart(ctx, {
+  const ctx = document.getElementById("myChart");
+
+  const labels = [];
+  const views = [];
+  const clicks = [];
+
+  // loop through my products array and add in the label, views and clicks data to my arrays
+  for (let i = 0; i < products.length; i++) {
+    labels.push(products[i].name);
+    views.push(products[i].views);
+    clicks.push(products[i].clicks);
+  }
+
+  new Chart(ctx, {
     type: "bar",
     data: {
-      labels: productNames,
+      labels: labels,
       datasets: [
         {
-          label: "Votes",
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          borderColor: "rgba(75, 192, 192, 1)",
+          label: "# of views",
+          data: views,
           borderWidth: 1,
-          data: voteData,
         },
         {
-          label: "Views",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          borderColor: "rgba(255, 99, 132, 1)",
+          type: "line",
+          label: "# of clicks",
+          data: clicks,
           borderWidth: 1,
-          data: viewData,
         },
       ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
     },
   });
 }
 
-// Function to show results and render the chart
-function showResults() {
-  collectData();
-  renderChart();
-  // Display the chart canvas element
-  chartCanvas.style.display = "block";
-}
-
-// Hide the chart initially
-chartCanvas.style.display = "none";
+renderProducts();
